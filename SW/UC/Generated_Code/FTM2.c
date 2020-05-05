@@ -6,7 +6,7 @@
 **     Component   : Init_FTM
 **     Version     : Component 01.009, Driver 01.09, CPU db: 3.00.000
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-04-28, 04:20, # CodeGen: 11
+**     Date/Time   : 2020-05-05, 19:50, # CodeGen: 16
 **     Abstract    :
 **          This file implements the FTM (FTM2) module initialization
 **          according to the Peripheral Initialization settings, and
@@ -76,15 +76,15 @@
 **          Channels                                       : 
 **            Channel 0                                    : Enabled
 **              Channel mode                               : Input capture
-**                Edge control                             : Capture disabled
-**              Input capture filter                       : Disabled
+**                Edge control                             : Rising or falling
+**              Input capture filter                       : 1
 **              Software output control                    : Disabled
 **              Pin                                        : Enabled
 **                Pin                                      : PTC0/KBI1_P2/FTM2_CH0/ADC0_SE8
 **                Pin signal                               : 
 **              Interrupt/DMA                              : 
 **                Interrupt                                : INT_FTM2
-**                Channel interrupt                        : Disabled
+**                Channel interrupt                        : Enabled
 **            Channel 1                                    : Enabled
 **              Channel mode                               : Output compare
 **                Output action                            : Toggle output
@@ -97,7 +97,16 @@
 **              Interrupt/DMA                              : 
 **                Interrupt                                : INT_FTM2
 **                Channel interrupt                        : Enabled
-**            Channel 2                                    : Disabled
+**            Channel 2                                    : Enabled
+**              Channel mode                               : Output compare
+**                Output action                            : Disconnected
+**                Channel value register                   : 65000
+**              Input capture filter                       : Disabled
+**              Software output control                    : Disabled
+**              Pin                                        : Disabled
+**              Interrupt/DMA                              : 
+**                Interrupt                                : INT_FTM2
+**                Channel interrupt                        : Enabled
 **            Channel 3                                    : Disabled
 **            Channel 4                                    : Disabled
 **            Channel 5                                    : Disabled
@@ -204,6 +213,7 @@ void FTM2_Init(void)
   FTM2_SC = (FTM_SC_CLKS(0x00) | FTM_SC_PS(0x00)); /* Stop the counter */
     (void)(FTM2_C0SC == 0U);           /* Dummy read of the FTM2_C0SC register to clear the interrupt flag */
     (void)(FTM2_C1SC == 0U);           /* Dummy read of the FTM2_C1SC register to clear the interrupt flag */
+    (void)(FTM2_C2SC == 0U);           /* Dummy read of the FTM2_C2SC register to clear the interrupt flag */
   /* FTM2_MODE: WPDIS=1 */
   FTM2_MODE |= FTM_MODE_WPDIS_MASK;    /* Disable write protection */
   /* FTM2_C0SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=0,MSB=0,MSA=0,ELSB=0,ELSA=0,??=0,??=0 */
@@ -222,7 +232,7 @@ void FTM2_Init(void)
   FTM2_SC &= (uint32_t)~(uint32_t)((FTM_SC_TOF_MASK | FTM_SC_CPWMS_MASK));
   /* FTM2_MODE: FTMEN=1 */
   FTM2_MODE |= FTM_MODE_FTMEN_MASK;
-  /* FTM2_COMBINE: FAULTEN2=0,SYNCEN2=0,DTEN2=0,COMP2=0,FAULTEN1=0,SYNCEN1=0,DTEN1=0,COMP1=0,FAULTEN0=0,SYNCEN0=0,DTEN0=0,DECAPEN0=0,COMP0=0,COMBINE0=0 */
+  /* FTM2_COMBINE: FAULTEN2=0,SYNCEN2=0,DTEN2=0,COMP2=0,FAULTEN1=0,SYNCEN1=0,DTEN1=0,DECAPEN1=0,COMP1=0,COMBINE1=0,FAULTEN0=0,SYNCEN0=0,DTEN0=0,DECAPEN0=0,COMP0=0,COMBINE0=0 */
   FTM2_COMBINE &= (uint32_t)~(uint32_t)(
                    FTM_COMBINE_FAULTEN2_MASK |
                    FTM_COMBINE_SYNCEN2_MASK |
@@ -231,7 +241,9 @@ void FTM2_Init(void)
                    FTM_COMBINE_FAULTEN1_MASK |
                    FTM_COMBINE_SYNCEN1_MASK |
                    FTM_COMBINE_DTEN1_MASK |
+                   FTM_COMBINE_DECAPEN1_MASK |
                    FTM_COMBINE_COMP1_MASK |
+                   FTM_COMBINE_COMBINE1_MASK |
                    FTM_COMBINE_FAULTEN0_MASK |
                    FTM_COMBINE_SYNCEN0_MASK |
                    FTM_COMBINE_DTEN0_MASK |
@@ -245,16 +257,17 @@ void FTM2_Init(void)
                    FTM_INVCTRL_INV1EN_MASK |
                    FTM_INVCTRL_INV0EN_MASK
                   );
-  /* FTM2_C0SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=0,MSB=0,MSA=0,ELSB=0,ELSA=0,??=0 */
-  FTM2_C0SC &= (uint32_t)~(uint32_t)(
-                FTM_CnSC_CHF_MASK |
-                FTM_CnSC_CHIE_MASK |
-                FTM_CnSC_MSB_MASK |
-                FTM_CnSC_MSA_MASK |
-                FTM_CnSC_ELSB_MASK |
-                FTM_CnSC_ELSA_MASK |
-                0xFFFFFF02U
-               );
+  /* FTM2_C0SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=1,MSB=0,MSA=0,ELSB=1,ELSA=1,??=0 */
+  FTM2_C0SC = (uint32_t)((FTM2_C0SC & (uint32_t)~(uint32_t)(
+               FTM_CnSC_CHF_MASK |
+               FTM_CnSC_MSB_MASK |
+               FTM_CnSC_MSA_MASK |
+               0xFFFFFF02U
+              )) | (uint32_t)(
+               FTM_CnSC_CHIE_MASK |
+               FTM_CnSC_ELSB_MASK |
+               FTM_CnSC_ELSA_MASK
+              ));
   /* FTM2_C1SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=1,MSB=0,MSA=1,ELSB=0,ELSA=1,??=0 */
   FTM2_C1SC = (uint32_t)((FTM2_C1SC & (uint32_t)~(uint32_t)(
                FTM_CnSC_CHF_MASK |
@@ -266,15 +279,17 @@ void FTM2_Init(void)
                FTM_CnSC_MSA_MASK |
                FTM_CnSC_ELSA_MASK
               ));
-  /* FTM2_C2SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,MSB=0,MSA=0,ELSB=0,ELSA=0,??=0 */
-  FTM2_C2SC &= (uint32_t)~(uint32_t)(
-                FTM_CnSC_CHF_MASK |
-                FTM_CnSC_MSB_MASK |
-                FTM_CnSC_MSA_MASK |
-                FTM_CnSC_ELSB_MASK |
-                FTM_CnSC_ELSA_MASK |
-                0xFFFFFF02U
-               );
+  /* FTM2_C2SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=1,MSB=0,MSA=1,ELSB=0,ELSA=0,??=0 */
+  FTM2_C2SC = (uint32_t)((FTM2_C2SC & (uint32_t)~(uint32_t)(
+               FTM_CnSC_CHF_MASK |
+               FTM_CnSC_MSB_MASK |
+               FTM_CnSC_ELSB_MASK |
+               FTM_CnSC_ELSA_MASK |
+               0xFFFFFF02U
+              )) | (uint32_t)(
+               FTM_CnSC_CHIE_MASK |
+               FTM_CnSC_MSA_MASK
+              ));
   /* FTM2_C3SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,MSB=0,MSA=0,ELSB=0,ELSA=0,??=0 */
   FTM2_C3SC &= (uint32_t)~(uint32_t)(
                 FTM_CnSC_CHF_MASK |
@@ -306,11 +321,16 @@ void FTM2_Init(void)
   FTM2_C0V &= (uint32_t)~(uint32_t)(0xFFFF0000U);
   /* FTM2_C1V: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,VAL=0xEA60 */
   FTM2_C1V = FTM_CnV_VAL(0xEA60);
-  /* FTM2_FILTER: CH1FVAL=0,CH0FVAL=0 */
-  FTM2_FILTER &= (uint32_t)~(uint32_t)(
-                  FTM_FILTER_CH1FVAL(0x0F) |
-                  FTM_FILTER_CH0FVAL(0x0F)
-                 );
+  /* FTM2_C2V: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,VAL=0xFDE8 */
+  FTM2_C2V = FTM_CnV_VAL(0xFDE8);
+  /* FTM2_FILTER: CH2FVAL=0,CH1FVAL=0,CH0FVAL=1 */
+  FTM2_FILTER = (uint32_t)((FTM2_FILTER & (uint32_t)~(uint32_t)(
+                 FTM_FILTER_CH2FVAL(0x0F) |
+                 FTM_FILTER_CH1FVAL(0x0F) |
+                 FTM_FILTER_CH0FVAL(0x0E)
+                )) | (uint32_t)(
+                 FTM_FILTER_CH0FVAL(0x01)
+                ));
   /* FTM2_OUTINIT: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
   FTM2_OUTINIT &= (uint32_t)~(uint32_t)(0xFFFFFF00U);
   /* FTM2_SYNC: SWSYNC=0,SYNCHOM=0,REINIT=0,CNTMAX=0,CNTMIN=0 */
@@ -386,8 +406,9 @@ void FTM2_Init(void)
                FTM_FMS_FAULTF1_MASK |
                FTM_FMS_FAULTF0_MASK
               );
-  /* FTM2_SWOCTRL: CH1OC=0,CH0OC=0 */
+  /* FTM2_SWOCTRL: CH2OC=0,CH1OC=0,CH0OC=0 */
   FTM2_SWOCTRL &= (uint32_t)~(uint32_t)(
+                   FTM_SWOCTRL_CH2OC_MASK |
                    FTM_SWOCTRL_CH1OC_MASK |
                    FTM_SWOCTRL_CH0OC_MASK
                   );

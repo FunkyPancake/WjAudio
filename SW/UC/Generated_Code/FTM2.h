@@ -6,7 +6,7 @@
 **     Component   : Init_FTM
 **     Version     : Component 01.009, Driver 01.09, CPU db: 3.00.000
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-04-28, 04:20, # CodeGen: 11
+**     Date/Time   : 2020-05-05, 19:50, # CodeGen: 16
 **     Abstract    :
 **          This file implements the FTM (FTM2) module initialization
 **          according to the Peripheral Initialization settings, and
@@ -76,15 +76,15 @@
 **          Channels                                       : 
 **            Channel 0                                    : Enabled
 **              Channel mode                               : Input capture
-**                Edge control                             : Capture disabled
-**              Input capture filter                       : Disabled
+**                Edge control                             : Rising or falling
+**              Input capture filter                       : 1
 **              Software output control                    : Disabled
 **              Pin                                        : Enabled
 **                Pin                                      : PTC0/KBI1_P2/FTM2_CH0/ADC0_SE8
 **                Pin signal                               : 
 **              Interrupt/DMA                              : 
 **                Interrupt                                : INT_FTM2
-**                Channel interrupt                        : Disabled
+**                Channel interrupt                        : Enabled
 **            Channel 1                                    : Enabled
 **              Channel mode                               : Output compare
 **                Output action                            : Toggle output
@@ -97,7 +97,16 @@
 **              Interrupt/DMA                              : 
 **                Interrupt                                : INT_FTM2
 **                Channel interrupt                        : Enabled
-**            Channel 2                                    : Disabled
+**            Channel 2                                    : Enabled
+**              Channel mode                               : Output compare
+**                Output action                            : Disconnected
+**                Channel value register                   : 65000
+**              Input capture filter                       : Disabled
+**              Software output control                    : Disabled
+**              Pin                                        : Disabled
+**              Interrupt/DMA                              : 
+**                Interrupt                                : INT_FTM2
+**                Channel interrupt                        : Enabled
 **            Channel 3                                    : Disabled
 **            Channel 4                                    : Disabled
 **            Channel 5                                    : Disabled
