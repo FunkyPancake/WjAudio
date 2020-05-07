@@ -42,6 +42,7 @@
 #include "J1850VPW.h"
 uint16_t tim;
 uint8_t testData[] = {0x8D, 0x0F, 0x00, 0x00};
+uint8_t testExData[8] = {0};
 
 PE_ISR(SysTickIsr){
 	tim++;
@@ -50,6 +51,8 @@ PE_ISR(SysTickIsr){
 		J1850_Transmit(testData,sizeof(testData));
 		tim = 0;
 	}
+	uint16_t len;
+	J1850_Recieve(testExData,&len);
 }
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
