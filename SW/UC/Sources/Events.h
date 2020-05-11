@@ -36,6 +36,9 @@
 #include "IO_Map.h"
 #include "FTM2.h"
 #include "SysTick.h"
+#include "DownButton.h"
+#include "PlayButton.h"
+#include "UpButton.h"
 
 #ifdef __cplusplus
 extern "C" {

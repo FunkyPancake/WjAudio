@@ -1,7 +1,9 @@
 #include "PE_Types.h"
 #include "CDChanger.h"
 #include "J1850VPW.h"
-
+#include "PlayButton.h"
+#include "UpButton.h"
+#include "DownButton.h"
 uint8_t RxBuffer[RX_BUFLEN];
 uint8_t TxBuffer[TX_BUFLEN] = {0x8D, 0x93, 0x01, 0x01, 0x80};
 typedef struct
@@ -26,8 +28,6 @@ void ParseRxData(void)
     {
         switch (RxBuffer[0])
         {
-
-        //Buttons data frame
         case 0x3D:
             if (RxBuffer[1] == 0x12)
             {
@@ -104,9 +104,9 @@ uint8_t EvalButton(uint8_t *timer)
 }
 void ControlButtons(void)
 {
-    EvalButton(&buttons.PlayPauseTimer);
-    EvalButton(&buttons.SeekDownTimer);
-    EvalButton(&buttons.SeekUpTimer);
+    PlayButton_PutVal(NULL,EvalButton(&buttons.PlayPauseTimer));
+    DownButton_PutVal(NULL,EvalButton(&buttons.SeekDownTimer));
+    UpButton_PutVal(NULL,EvalButton(&buttons.SeekUpTimer));
 }
 void CDChanger_1ms(void)
 {

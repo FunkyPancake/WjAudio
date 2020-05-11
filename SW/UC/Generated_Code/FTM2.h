@@ -6,7 +6,7 @@
 **     Component   : Init_FTM
 **     Version     : Component 01.009, Driver 01.09, CPU db: 3.00.000
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-05-05, 19:50, # CodeGen: 16
+**     Date/Time   : 2020-05-07, 05:28, # CodeGen: 19
 **     Abstract    :
 **          This file implements the FTM (FTM2) module initialization
 **          according to the Peripheral Initialization settings, and

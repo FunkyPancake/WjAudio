@@ -7,7 +7,7 @@
 **     Version     : Component 01.017, Driver 01.04, CPU db: 3.00.000
 **     Datasheet   : MKE04Z24M48SF0RM, Rev.1, May-23 2013; KEAZ8RM, Rev.1, Sep 2013
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-04-24, 01:15, # CodeGen: 6
+**     Date/Time   : 2020-05-11, 23:19, # CodeGen: 21
 **     Abstract    :
 **
 **     Settings    :
@@ -62,6 +62,9 @@
 /* {Default RTOS Adapter} No RTOS includes */
 #include "FTM2.h"
 #include "SysTick.h"
+#include "DownButton.h"
+#include "PlayButton.h"
+#include "UpButton.h"
 #include "PE_Types.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
@@ -226,6 +229,12 @@ void PE_low_level_init(void)
   FTM2_Init();
   /* ### Init_SysTick "SysTick" init code ... */
   SysTick_Init();
+  /* ### BitIO_LDD "DownButton" component auto initialization. Auto initialization feature can be disabled by component property "Auto initialization". */
+  (void)DownButton_Init(NULL);
+  /* ### BitIO_LDD "PlayButton" component auto initialization. Auto initialization feature can be disabled by component property "Auto initialization". */
+  (void)PlayButton_Init(NULL);
+  /* ### BitIO_LDD "UpButton" component auto initialization. Auto initialization feature can be disabled by component property "Auto initialization". */
+  (void)UpButton_Init(NULL);
   __EI();
 }
   /* Flash configuration field */

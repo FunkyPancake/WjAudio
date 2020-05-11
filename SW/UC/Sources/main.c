@@ -31,6 +31,9 @@
 #include "Events.h"
 #include "FTM2.h"
 #include "SysTick.h"
+#include "DownButton.h"
+#include "PlayButton.h"
+#include "UpButton.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
