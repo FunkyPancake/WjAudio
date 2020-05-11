@@ -3,7 +3,6 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
-
 /*timing thresholds for symbols*/
 #define RX_SHORT_MIN US2TICKS(34)
 #define RX_SHORT_MAX US2TICKS(96)
@@ -11,7 +10,7 @@
 #define RX_LONG_MAX US2TICKS(163)
 #define RX_SOF_MIN US2TICKS(163)
 #define RX_SOF_MAX US2TICKS(239)
-
+#define RX_EOF_MIN US2TICKS(239)
 #define SOF_US 200
 #define LONG_US 128
 #define SHORT_US 64
@@ -22,9 +21,6 @@
 #define SOF_IDX 2
 #define EOF_IDX 3
 
-
-
-
 /*Functions declaration*/
 uint8_t J1850VPW_CalcCRC(uint8_t *data, uint8_t size);
 void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len);
@@ -32,8 +28,7 @@ uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf);
 inline void SetTimerAlarm(uint32_t *counterRegister, uint16_t value);
 inline uint16_t GetPulseWidth(uint16_t a, uint16_t b);
 inline void ResetRx(void);
-
-
+inline FinalizeTx(void);
 
 volatile uint8_t VPW_RxBuf[(RX_BUFLEN + 1) * 8];
 volatile uint8_t VPW_TxBuf[(TX_BUFLEN + 1) * 8];
@@ -41,7 +36,7 @@ uint16_t VPW_RxBufPtr;
 uint16_t VPW_TxBufPtr;
 volatile uint8_t TxInProgress;
 volatile VPW_RxStatus_t RxInProgress;
-volatile uint16_t PrevCntrVal;
+volatile uint32_t PrevCntrVal;
 const uint8_t crctable[256] = {0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53,
                                0xE8, 0xF5, 0xD2, 0xCF, 0x9C, 0x81, 0xA6, 0xBB, 0xCD, 0xD0, 0xF7, 0xEA,
                                0xB9, 0xA4, 0x83, 0x9E, 0x25, 0x38, 0x1F, 0x02, 0x51, 0x4C, 0x6B, 0x76,
@@ -70,11 +65,10 @@ const uint32_t VPW_Symbols[] = {
     US2TICKS(SOF_US),
     US2TICKS(EOF_US)};
 
-
 void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len)
 {
     int i, j, idx, pSymIdx;
-    uint8_t cBit, pBit,crc;
+    uint8_t cBit, pBit, crc;
     VPW_TxBuf[0] = SOF_IDX;
     idx = 1;
     pBit = 1;
@@ -110,8 +104,8 @@ void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len)
 
 uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf)
 {
-    uint16_t i,idx;
-    int j ;
+    uint16_t i, idx;
+    int j;
     uint16_t len;
     uint8_t cBit, pSymIdx, cSymIdx;
     idx = 1;
@@ -120,10 +114,15 @@ uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf)
     len = 0;
     for (i = 0; i < sizeof(VPW_RxBuf); i++)
     {
+        if (VPW_RxBuf[idx] > EOF_IDX)
+        {
+            return 0;
+        }
         if (VPW_RxBuf[idx] == EOF_IDX)
         {
             break;
         }
+        byteBuf[i] = 0;
         for (j = 7; j >= 0; j--)
         {
             cSymIdx = VPW_RxBuf[idx];
@@ -174,6 +173,15 @@ inline void ResetRx(void)
 {
     RxInProgress = (VPW_RxStatus_t)Idle;
     FTM2_C1SC &= ~(FTM_CnSC_ELSB_MASK);
+    VPW_RxBufPtr = 0;
+    FTM2_C2V = -1;
+
+}
+inline FinalizeTx(void)
+{
+    FTM2_C1V = -1;
+    FTM2_MODE = FTM_MODE_INIT_MASK;
+    TxInProgress = 0;
 }
 
 uint8_t J1850_Transmit(uint8_t *byteBuf, uint16_t len)
@@ -184,7 +192,7 @@ uint8_t J1850_Transmit(uint8_t *byteBuf, uint16_t len)
         J1850VPW_ByteToBits(byteBuf, len);
         VPW_TxBufPtr = 0;
         curVal = FTM2_CNT;
-        SetTimerAlarm((uint32_t*)&FTM2_C1V, curVal + 10);
+        SetTimerAlarm((uint32_t *)&FTM2_C1V, curVal + 10);
         TxInProgress = 1;
         return 0;
     }
@@ -198,6 +206,7 @@ uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
     if (RxInProgress == (VPW_RxStatus_t)Done)
     {
         rawLen = J1850VPW_BitsToByte(byteBuf);
+        
         crc = J1850VPW_CalcCRC(byteBuf, rawLen - 1);
 
         if (byteBuf[rawLen - 1] == crc)
@@ -206,6 +215,10 @@ uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
             ret = 2;
         *len = rawLen - 1;
         ResetRx();
+    }
+    if(RxInProgress == (VPW_RxStatus_t)Error){
+        ResetRx();
+        ret = 3;
     }
     return ret;
 }
@@ -226,12 +239,11 @@ PE_ISR(FTM_Isr)
         nextVal = VPW_Symbols[VPW_TxBuf[VPW_TxBufPtr]];
         if (VPW_TxBuf[VPW_TxBufPtr] == EOF_IDX)
         {
-            FTM2_C1V = -1;
-            TxInProgress = 0;
+            FinalizeTx();
         }
         else
         {
-            SetTimerAlarm((uint32_t*)&FTM2_C1V, curVal + nextVal);
+            SetTimerAlarm((uint32_t *)&FTM2_C1V, curVal + nextVal);
         }
         VPW_TxBufPtr++;
     }
@@ -246,7 +258,7 @@ PE_ISR(FTM_Isr)
         }
         else if (RxInProgress == 1)
         {
-            uint16_t width;
+            uint32_t width;
             uint8_t symIdx;
             width = GetPulseWidth(PrevCntrVal, curVal);
             if (width > RX_SOF_MIN && width <= RX_SOF_MAX)
@@ -263,20 +275,19 @@ PE_ISR(FTM_Isr)
             }
             else
             {
-                RxInProgress = (VPW_RxStatus_t)Error;
-                symIdx = EOF_IDX;
+            	ResetRx();
+            	return;
             }
             VPW_RxBuf[VPW_RxBufPtr] = symIdx;
             if (TxInProgress == 1)
             {
                 if (VPW_RxBuf[VPW_RxBufPtr] != VPW_TxBuf[VPW_RxBufPtr])
                 {
-                    FTM2_C1V = -1;
-                    TxInProgress = 0;
+                    FinalizeTx();
                 }
             }
             VPW_RxBufPtr++;
-            SetTimerAlarm((uint32_t*)&FTM2_C2V, curVal + 150);
+            SetTimerAlarm((uint32_t *)&FTM2_C2V, curVal + RX_EOF_MIN);
         }
         PrevCntrVal = curVal;
     }
@@ -284,6 +295,9 @@ PE_ISR(FTM_Isr)
     {
         FTM2_STATUS &= ~(FTM_STATUS_CH2F_MASK);
         VPW_RxBuf[VPW_RxBufPtr] = EOF_IDX;
-        RxInProgress = (VPW_RxStatus_t)Done;
+        FTM2_C2V = -1;
+        if(RxInProgress == 1){
+        	RxInProgress = (VPW_RxStatus_t)Done;
+        }
     }
 }
