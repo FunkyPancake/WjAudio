@@ -286,7 +286,10 @@ PE_ISR(FTM_Isr)
                     FinalizeTx();
                 }
             }
-            VPW_RxBufPtr++;
+            if (VPW_RxBufPtr < sizeof(VPW_RxBuf) - 2)
+            {
+                VPW_RxBufPtr++;
+            }
             SetTimerAlarm((uint32_t *)&FTM2_C2V, curVal + RX_EOF_MIN);
         }
         PrevCntrVal = curVal;
