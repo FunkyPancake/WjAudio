@@ -19,13 +19,12 @@
 ** @brief
 **         Main module.
 **         This module contains user's application code.
-*/         
+*/
 /*!
 **  @addtogroup main_module main module documentation
 **  @{
-*/         
+*/
 /* MODULE main */
-
 
 /* Including needed modules to compile this module/procedure */
 #include "Cpu.h"
@@ -39,20 +38,11 @@
 #include "IO_Map.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
-#include "J1850VPW.h"
-uint16_t tim;
-uint8_t testData[] = {0x8D, 0x0F, 0x00, 0x00};
-uint8_t testExData[8] = {0};
+#include "CDChanger.h"
 
-PE_ISR(SysTickIsr){
-	tim++;
-	if(tim == 100)
-	{
-		J1850_Transmit(testData,sizeof(testData));
-		tim = 0;
-	}
-	uint16_t len;
-	J1850_Recieve(testExData,&len);
+PE_ISR(SysTickIsr)
+{
+  CDChanger_1ms();
 }
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
@@ -68,7 +58,7 @@ int main(void)
   /* Write your code here */
   /* For example: for(;;) { } */
   J1850Init();
-  /*** Don't write any code pass this line, or it will be deleted during code generation. ***/
+/*** Don't write any code pass this line, or it will be deleted during code generation. ***/
   /*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
   #ifdef PEX_RTOS_START
     PEX_RTOS_START();                  /* Startup of the selected RTOS. Macro is defined by the RTOS component. */

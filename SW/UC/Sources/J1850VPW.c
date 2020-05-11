@@ -2,15 +2,9 @@
 #include "PE_Error.h"
 #include "PE_Const.h"
 #include "IO_Map.h"
-#define RX_BUFLEN 16
-#define TX_BUFLEN 6
 
-#define SOF_US 200
-#define LONG_US 128
-#define SHORT_US 64
-#define EOF_US 200
 
-//timing thresholds for symbols
+/*timing thresholds for symbols*/
 #define RX_SHORT_MIN US2TICKS(34)
 #define RX_SHORT_MAX US2TICKS(96)
 #define RX_LONG_MIN US2TICKS(96)
@@ -18,30 +12,33 @@
 #define RX_SOF_MIN US2TICKS(163)
 #define RX_SOF_MAX US2TICKS(239)
 
+#define SOF_US 200
+#define LONG_US 128
+#define SHORT_US 64
+#define EOF_US 200
+
 #define LONG_IDX 0
 #define SHORT_IDX 1
 #define SOF_IDX 2
 #define EOF_IDX 3
 
-const uint32_t VPW_Symbols[] = {
-    US2TICKS(LONG_US),
-    US2TICKS(SHORT_US),
-    US2TICKS(SOF_US),
-    US2TICKS(EOF_US)};
 
-typedef enum
-{
-    Idle,
-    SOF,
-    Acvtive,
-    Done,
-    Error
-} VPW_RxStatus_t;
+
+
+/*Functions declaration*/
+uint8_t J1850VPW_CalcCRC(uint8_t *data, uint8_t size);
+void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len);
+uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf);
+inline void SetTimerAlarm(uint32_t *counterRegister, uint16_t value);
+inline uint16_t GetPulseWidth(uint16_t a, uint16_t b);
+inline void ResetRx(void);
+
+
 
 volatile uint8_t VPW_RxBuf[(RX_BUFLEN + 1) * 8];
 volatile uint8_t VPW_TxBuf[(TX_BUFLEN + 1) * 8];
-volatile uint16_t VPW_RxBufPtr;
-volatile uint16_t VPW_TxBufPtr;
+uint16_t VPW_RxBufPtr;
+uint16_t VPW_TxBufPtr;
 volatile uint8_t TxInProgress;
 volatile VPW_RxStatus_t RxInProgress;
 volatile uint16_t PrevCntrVal;
@@ -67,18 +64,17 @@ const uint8_t crctable[256] = {0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53,
                                0xB2, 0xAF, 0x88, 0x95, 0xC6, 0xDB, 0xFC, 0xE1, 0x5A, 0x47, 0x60, 0x7D,
                                0x2E, 0x33, 0x14, 0x09, 0x7F, 0x62, 0x45, 0x58, 0x0B, 0x16, 0x31, 0x2C,
                                0x97, 0x8A, 0xAD, 0xB0, 0xE3, 0xFE, 0xD9, 0xC4};
+const uint32_t VPW_Symbols[] = {
+    US2TICKS(LONG_US),
+    US2TICKS(SHORT_US),
+    US2TICKS(SOF_US),
+    US2TICKS(EOF_US)};
 
-uint8_t J1850VPW_CalcCRC(uint8_t *data, uint8_t size);
-void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len);
-uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf);
-inline void SetTimerAlarm(uint32_t *counterRegister, uint16_t value);
-inline uint16_t GetPulseWidth(uint16_t a, uint16_t b);
-inline void ResetRx(void);
 
 void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len)
 {
     int i, j, idx, pSymIdx;
-    uint8_t cBit, pBit;
+    uint8_t cBit, pBit,crc;
     VPW_TxBuf[0] = SOF_IDX;
     idx = 1;
     pBit = 1;
@@ -97,7 +93,7 @@ void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len)
             idx++;
         }
     }
-    uint8_t crc = J1850VPW_CalcCRC(byteBuf, len);
+    crc = J1850VPW_CalcCRC(byteBuf, len);
     for (j = 7; j >= 0; j--)
     {
         cBit = (crc & (1 << j)) && 1;
@@ -114,7 +110,8 @@ void J1850VPW_ByteToBits(uint8_t *byteBuf, uint16_t len)
 
 uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf)
 {
-    int i, j, idx;
+    uint16_t i,idx;
+    int j ;
     uint16_t len;
     uint8_t cBit, pSymIdx, cSymIdx;
     idx = 1;
@@ -173,7 +170,7 @@ inline uint16_t GetPulseWidth(uint16_t a, uint16_t b)
     return b - a;
 }
 
-void ResetRx(void)
+inline void ResetRx(void)
 {
     RxInProgress = (VPW_RxStatus_t)Idle;
     FTM2_C1SC &= ~(FTM_CnSC_ELSB_MASK);
@@ -187,9 +184,11 @@ uint8_t J1850_Transmit(uint8_t *byteBuf, uint16_t len)
         J1850VPW_ByteToBits(byteBuf, len);
         VPW_TxBufPtr = 0;
         curVal = FTM2_CNT;
-        SetTimerAlarm(&FTM2_C1V, curVal + 10);
+        SetTimerAlarm((uint32_t*)&FTM2_C1V, curVal + 10);
         TxInProgress = 1;
+        return 0;
     }
+    return 1;
 }
 
 uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
@@ -211,13 +210,13 @@ uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
     return ret;
 }
 
-void J1850Init()
+inline void J1850Init()
 {
     TxInProgress = 0;
     ResetRx();
 }
 
-__attribute__((section(".mysegment"))) PE_ISR(FTM_Isr)
+PE_ISR(FTM_Isr)
 {
     uint32_t nextVal;
     uint32_t curVal = FTM2_CNT;
@@ -232,7 +231,7 @@ __attribute__((section(".mysegment"))) PE_ISR(FTM_Isr)
         }
         else
         {
-            SetTimerAlarm(&FTM2_C1V, curVal + nextVal);
+            SetTimerAlarm((uint32_t*)&FTM2_C1V, curVal + nextVal);
         }
         VPW_TxBufPtr++;
     }
@@ -265,6 +264,7 @@ __attribute__((section(".mysegment"))) PE_ISR(FTM_Isr)
             else
             {
                 RxInProgress = (VPW_RxStatus_t)Error;
+                symIdx = EOF_IDX;
             }
             VPW_RxBuf[VPW_RxBufPtr] = symIdx;
             if (TxInProgress == 1)
@@ -276,7 +276,7 @@ __attribute__((section(".mysegment"))) PE_ISR(FTM_Isr)
                 }
             }
             VPW_RxBufPtr++;
-            SetTimerAlarm(&FTM2_C2V, curVal + 150);
+            SetTimerAlarm((uint32_t*)&FTM2_C2V, curVal + 150);
         }
         PrevCntrVal = curVal;
     }
