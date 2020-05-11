@@ -28,7 +28,7 @@ uint16_t J1850VPW_BitsToByte(uint8_t *byteBuf);
 inline void SetTimerAlarm(uint32_t *counterRegister, uint16_t value);
 inline uint16_t GetPulseWidth(uint16_t a, uint16_t b);
 inline void ResetRx(void);
-inline FinalizeTx(void);
+inline void FinalizeTx(void);
 
 volatile uint8_t VPW_RxBuf[(RX_BUFLEN + 1) * 8];
 volatile uint8_t VPW_TxBuf[(TX_BUFLEN + 1) * 8];
@@ -175,9 +175,8 @@ inline void ResetRx(void)
     FTM2_C1SC &= ~(FTM_CnSC_ELSB_MASK);
     VPW_RxBufPtr = 0;
     FTM2_C2V = -1;
-
 }
-inline FinalizeTx(void)
+inline void FinalizeTx(void)
 {
     FTM2_C1V = -1;
     FTM2_MODE = FTM_MODE_INIT_MASK;
@@ -206,7 +205,7 @@ uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
     if (RxInProgress == (VPW_RxStatus_t)Done)
     {
         rawLen = J1850VPW_BitsToByte(byteBuf);
-        
+
         crc = J1850VPW_CalcCRC(byteBuf, rawLen - 1);
 
         if (byteBuf[rawLen - 1] == crc)
@@ -216,7 +215,8 @@ uint8_t J1850_Recieve(uint8_t *byteBuf, uint16_t *len)
         *len = rawLen - 1;
         ResetRx();
     }
-    if(RxInProgress == (VPW_RxStatus_t)Error){
+    if (RxInProgress == (VPW_RxStatus_t)Error)
+    {
         ResetRx();
         ret = 3;
     }
@@ -275,8 +275,8 @@ PE_ISR(FTM_Isr)
             }
             else
             {
-            	ResetRx();
-            	return;
+                ResetRx();
+                return;
             }
             VPW_RxBuf[VPW_RxBufPtr] = symIdx;
             if (TxInProgress == 1)
@@ -296,8 +296,9 @@ PE_ISR(FTM_Isr)
         FTM2_STATUS &= ~(FTM_STATUS_CH2F_MASK);
         VPW_RxBuf[VPW_RxBufPtr] = EOF_IDX;
         FTM2_C2V = -1;
-        if(RxInProgress == 1){
-        	RxInProgress = (VPW_RxStatus_t)Done;
+        if (RxInProgress == 1)
+        {
+            RxInProgress = (VPW_RxStatus_t)Done;
         }
     }
 }

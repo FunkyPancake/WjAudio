@@ -1,3 +1,3 @@
 #pragma once
-#define PING_PERIOD_MS 100
+#define BUTTON_TIMER 10
 void CDChanger_1ms(void);
