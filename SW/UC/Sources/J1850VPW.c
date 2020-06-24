@@ -1,3 +1,4 @@
+#include "PE_Types.h"
 #include "J1850VPW.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
@@ -30,14 +31,14 @@ inline uint16_t GetPulseWidth(uint16_t a, uint16_t b);
 inline void ResetRx(void);
 inline void FinalizeTx(void);
 
-volatile uint8_t VPW_RxBuf[(RX_BUFLEN + 1) * 8];
-volatile uint8_t VPW_TxBuf[(TX_BUFLEN + 1) * 8];
-uint16_t VPW_RxBufPtr;
-uint16_t VPW_TxBufPtr;
-volatile uint8_t TxInProgress;
-volatile VPW_RxStatus_t RxInProgress;
-volatile uint32_t PrevCntrVal;
-const uint8_t crctable[256] = {0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53,
+static volatile uint8_t VPW_RxBuf[(RX_BUFLEN + 1) * 8];
+static volatile uint8_t VPW_TxBuf[(TX_BUFLEN + 1) * 8];
+static uint16_t VPW_RxBufPtr;
+static uint16_t VPW_TxBufPtr;
+static volatile uint8_t TxInProgress;
+static volatile VPW_RxStatus_t RxInProgress;
+static volatile uint32_t PrevCntrVal;
+static const uint8_t crctable[256] = {0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53,
                                0xE8, 0xF5, 0xD2, 0xCF, 0x9C, 0x81, 0xA6, 0xBB, 0xCD, 0xD0, 0xF7, 0xEA,
                                0xB9, 0xA4, 0x83, 0x9E, 0x25, 0x38, 0x1F, 0x02, 0x51, 0x4C, 0x6B, 0x76,
                                0x87, 0x9A, 0xBD, 0xA0, 0xF3, 0xEE, 0xC9, 0xD4, 0x6F, 0x72, 0x55, 0x48,

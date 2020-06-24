@@ -1,7 +1,6 @@
 #pragma once
-#include "PE_Types.h"
-#define RX_BUFLEN 16
-#define TX_BUFLEN 6
+#define RX_BUFLEN 12
+#define TX_BUFLEN 12
 #define US2TICKS(x) ((uint16_t)((uint32_t)(x * 790) / 1024) - 1)
 
 typedef enum

@@ -39,6 +39,7 @@
 #include "DownButton.h"
 #include "PlayButton.h"
 #include "UpButton.h"
+#include "BtRst.h"
 
 #ifdef __cplusplus
 extern "C" {

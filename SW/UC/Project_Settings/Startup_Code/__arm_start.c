@@ -248,7 +248,7 @@ void __thumb_startup(void)
 
 		//	call C++ static initializers
 
-		__call_static_initializers();
+//		__call_static_initializers();
 
 
 

@@ -7,7 +7,7 @@
 **     Version     : Component 01.017, Driver 01.04, CPU db: 3.00.000
 **     Datasheet   : MKE04Z24M48SF0RM, Rev.1, May-23 2013; KEAZ8RM, Rev.1, Sep 2013
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-05-11, 23:19, # CodeGen: 21
+**     Date/Time   : 2020-06-24, 14:45, # CodeGen: 23
 **     Abstract    :
 **
 **     Settings    :
@@ -65,6 +65,7 @@
 #include "DownButton.h"
 #include "PlayButton.h"
 #include "UpButton.h"
+#include "BtRst.h"
 #include "PE_Types.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
@@ -235,6 +236,8 @@ void PE_low_level_init(void)
   (void)PlayButton_Init(NULL);
   /* ### BitIO_LDD "UpButton" component auto initialization. Auto initialization feature can be disabled by component property "Auto initialization". */
   (void)UpButton_Init(NULL);
+  /* ### BitIO_LDD "BtRst" component auto initialization. Auto initialization feature can be disabled by component property "Auto initialization". */
+  (void)BtRst_Init(NULL);
   __EI();
 }
   /* Flash configuration field */
