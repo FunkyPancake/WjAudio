@@ -141,3 +141,14 @@ void CDChanger_1ms(void)
     ControlButtons();
     RstBtModule();
 }
+void InitBtResetTimer(uint8_t isPor)
+{
+	
+	if(isPor){
+		RstCntr = 0;
+	}
+	else{
+		RstCntr = BT_RST_DELAY;
+	}
+
+}

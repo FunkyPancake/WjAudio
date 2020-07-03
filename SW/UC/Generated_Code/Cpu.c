@@ -7,7 +7,7 @@
 **     Version     : Component 01.017, Driver 01.04, CPU db: 3.00.000
 **     Datasheet   : MKE04Z24M48SF0RM, Rev.1, May-23 2013; KEAZ8RM, Rev.1, Sep 2013
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-06-24, 14:45, # CodeGen: 23
+**     Date/Time   : 2020-07-04, 00:58, # CodeGen: 24
 **     Abstract    :
 **
 **     Settings    :
@@ -81,20 +81,6 @@ extern "C" {
 volatile uint8_t SR_reg;               /* Current value of the FAULTMASK register */
 volatile uint8_t SR_lock = 0x00U;      /* Lock */
 
-
-/*
-** ===================================================================
-**     Method      :  Cpu_INT_NMIInterrupt (component MKE04Z8WJ4)
-**
-**     Description :
-**         This ISR services the Non Maskable Interrupt interrupt.
-**         This method is internal. It is used by Processor Expert only.
-** ===================================================================
-*/
-PE_ISR(Cpu_INT_NMIInterrupt)
-{
-  Cpu_OnNMIINT();
-}
 
 /*
 ** ===================================================================
@@ -217,12 +203,12 @@ void PE_low_level_init(void)
               )) | (uint32_t)(
                SCB_SHPR3_PRI_15(0xC0)
               ));
-  /* SIM_SOPT: CLKOE=0,RSTPE=1,NMIE=1 */
+  /* SIM_SOPT: CLKOE=0,RSTPE=1,NMIE=0 */
   SIM_SOPT = (uint32_t)((SIM_SOPT & (uint32_t)~(uint32_t)(
-              SIM_SOPT_CLKOE_MASK
-             )) | (uint32_t)(
-              SIM_SOPT_RSTPE_MASK |
+              SIM_SOPT_CLKOE_MASK |
               SIM_SOPT_NMIE_MASK
+             )) | (uint32_t)(
+              SIM_SOPT_RSTPE_MASK
              ));
   /* NVIC_IPR1: PRI_6=0 */
   NVIC_IPR1 &= (uint32_t)~(uint32_t)(NVIC_IP_PRI_6(0xFF));

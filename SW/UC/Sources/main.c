@@ -63,6 +63,8 @@ int main(void)
   /* Write your code here */
   /* For example: for(;;) { } */
   J1850Init();
+  InitBtResetTimer( ((SIM_SRSID & SIM_SRSID_POR_MASK) == SIM_SRSID_POR_MASK) && ( (SIM_SRSID & SIM_SRSID_LVD_MASK) == SIM_SRSID_LVD_MASK));
+
 /*** Don't write any code pass this line, or it will be deleted during code generation. ***/
   /*** RTOS startup code. Macro PEX_RTOS_START is defined by the RTOS component. DON'T MODIFY THIS CODE!!! ***/
   #ifdef PEX_RTOS_START
