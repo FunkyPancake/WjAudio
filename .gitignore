@@ -1,1 +1,11 @@
-Resources/~$j1850.docx
+/FLASH
+/.settings
+/Documentation
+/.vscode
+/.idea
+
+
+*.g_c
+*.g_x
+**.xml
+.cwGeneratedFileSetLog
