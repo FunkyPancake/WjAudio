@@ -6,7 +6,7 @@
 **     Component   : Init_SysTick
 **     Version     : Component 01.006, Driver 01.06, CPU db: 3.00.000
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-08-04, 16:20, # CodeGen: 25
+**     Date/Time   : 2021-04-25, 01:43, # CodeGen: 2
 **     Abstract    :
 **          This file implements the SysTick (SysTick) module initialization
 **          according to the Peripheral Initialization settings, and
@@ -16,7 +16,7 @@
 **          Device                                         : SysTick
 **          Settings                                       : 
 **            Clock source                                 : Processor clock
-**            Reload value                                 : 20480
+**            Reload value                                 : 40960
 **            Counter period                               : 1.000 ms
 **          Interrupts                                     : 
 **            Interrupt                                    : INT_SysTick
@@ -102,8 +102,8 @@ void SysTick_Init(void)
 {
   /* SYST_CSR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,COUNTFLAG=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CLKSOURCE=0,TICKINT=0,ENABLE=0 */
   SYST_CSR = 0x00U;
-  /* SYST_RVR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,RELOAD=0x5000 */
-  SYST_RVR = SysTick_RVR_RELOAD(0x5000);
+  /* SYST_RVR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,RELOAD=0xA000 */
+  SYST_RVR = SysTick_RVR_RELOAD(0xA000);
   /* SYST_CVR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CURRENT=0 */
   SYST_CVR = SysTick_CVR_CURRENT(0x00);
   /* SYST_CSR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,COUNTFLAG=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CLKSOURCE=1,TICKINT=1,ENABLE=1 */

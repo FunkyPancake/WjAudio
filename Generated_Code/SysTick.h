@@ -6,7 +6,7 @@
 **     Component   : Init_SysTick
 **     Version     : Component 01.006, Driver 01.06, CPU db: 3.00.000
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-08-04, 16:20, # CodeGen: 25
+**     Date/Time   : 2021-04-25, 01:43, # CodeGen: 2
 **     Abstract    :
 **          This file implements the SysTick (SysTick) module initialization
 **          according to the Peripheral Initialization settings, and
@@ -16,7 +16,7 @@
 **          Device                                         : SysTick
 **          Settings                                       : 
 **            Clock source                                 : Processor clock
-**            Reload value                                 : 20480
+**            Reload value                                 : 40960
 **            Counter period                               : 1.000 ms
 **          Interrupts                                     : 
 **            Interrupt                                    : INT_SysTick

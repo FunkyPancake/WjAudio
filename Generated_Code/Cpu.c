@@ -7,7 +7,7 @@
 **     Version     : Component 01.016, Driver 01.04, CPU db: 3.00.000
 **     Datasheet   : MKE04Z24M48SF0RM, Rev.1, May-23 2013; KEAZ8RM, Rev.1, Sep 2013
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-08-04, 16:20, # CodeGen: 25
+**     Date/Time   : 2021-04-25, 01:43, # CodeGen: 2
 **     Abstract    :
 **
 **     Settings    :
@@ -122,23 +122,18 @@ void __init_hardware(void)
              WDOG_CS1_STOP_MASK;
 
   /* System clock initialization */
-  /* ICS_C2: BDIV|=1 */
-  ICS_C2 |= ICS_C2_BDIV(0x01);         /* Update system prescalers */
-  /* SIM_CLKDIV: ??=0,??=0,OUTDIV1=0,??=0,??=0,??=0,OUTDIV2=0,??=0,??=0,??=0,OUTDIV3=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
-  SIM_CLKDIV = SIM_CLKDIV_OUTDIV1(0x00); /* Update system prescalers */
+  /* SIM_CLKDIV: ??=0,??=0,OUTDIV1=0,??=0,??=0,??=0,OUTDIV2=1,??=0,??=0,??=0,OUTDIV3=1,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
+  SIM_CLKDIV = SIM_CLKDIV_OUTDIV1(0x00) |
+               SIM_CLKDIV_OUTDIV2_MASK |
+               SIM_CLKDIV_OUTDIV3_MASK; /* Update system prescalers */
   /* Switch to FEI Mode */
   /* ICS_C1: CLKS=0,RDIV=0,IREFS=1,IRCLKEN=1,IREFSTEN=0 */
   ICS_C1 = ICS_C1_CLKS(0x00) |
            ICS_C1_RDIV(0x00) |
            ICS_C1_IREFS_MASK |
            ICS_C1_IRCLKEN_MASK;
-  /* ICS_C2: BDIV=1,LP=0 */
-  ICS_C2 = (uint8_t)((ICS_C2 & (uint8_t)~(uint8_t)(
-            ICS_C2_BDIV(0x06) |
-            ICS_C2_LP_MASK
-           )) | (uint8_t)(
-            ICS_C2_BDIV(0x01)
-           ));
+  /* ICS_C2: BDIV=0,LP=0 */
+  ICS_C2 &= (uint8_t)~(uint8_t)((ICS_C2_BDIV(0x07) | ICS_C2_LP_MASK));
   /* OSC_CR: OSCEN=0,??=0,OSCSTEN=0,OSCOS=0,??=0,RANGE=0,HGO=0,OSCINIT=0 */
   OSC_CR = 0x00U;
   while((ICS_S & ICS_S_IREFST_MASK) == 0x00U) { /* Check that the source of the FLL reference clock is the internal reference clock. */
