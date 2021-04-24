@@ -7,7 +7,7 @@
 **     Version     : Component 01.016, Driver 01.04, CPU db: 3.00.000
 **     Datasheet   : MKE04Z24M48SF0RM, Rev.1, May-23 2013; KEAZ8RM, Rev.1, Sep 2013
 **     Compiler    : GNU C Compiler
-**     Date/Time   : 2020-08-04, 16:20, # CodeGen: 25
+**     Date/Time   : 2021-04-25, 01:43, # CodeGen: 2
 **     Abstract    :
 **
 **     Settings    :
@@ -82,12 +82,12 @@ extern "C" {
 /* Events configuration constants - generated for all enabled component's events */
 
 #define CPU_BUS_CLK_HZ                  20480000U /* Initial value of the bus clock frequency in Hz */
-#define CPU_CORE_CLK_HZ                 20480000U /* Initial value of the core/system clock frequency in Hz.  */
+#define CPU_CORE_CLK_HZ                 40960000U /* Initial value of the core/system clock frequency in Hz.  */
 
 #define CPU_CLOCK_CONFIG_NUMBER         0x01U /* Specifies number of defined clock configurations. */
 
 #define CPU_BUS_CLK_HZ_CLOCK_CONFIG0    20480000U /* Value of the bus clock frequency in the clock configuration 0 in Hz. */
-#define CPU_CORE_CLK_HZ_CLOCK_CONFIG0   20480000U /* Value of the core/system clock frequency in the clock configuration 0 in Hz. */
+#define CPU_CORE_CLK_HZ_CLOCK_CONFIG0   40960000U /* Value of the core/system clock frequency in the clock configuration 0 in Hz. */
 
 
 #define CPU_INT_SLOW_CLK_HZ             32000U /* Value of the slow internal oscillator clock frequency in Hz  */
@@ -99,7 +99,7 @@ extern "C" {
 
 /* CPU frequencies in clock configuration 0 */
 #define CPU_CLOCK_CONFIG_0              0x00U /* Clock configuration 0 identifier */
-#define CPU_CORE_CLK_HZ_CONFIG_0        20480000UL /* Core clock frequency in clock configuration 0 */
+#define CPU_CORE_CLK_HZ_CONFIG_0        40960000UL /* Core clock frequency in clock configuration 0 */
 #define CPU_BUS_CLK_HZ_CONFIG_0         20480000UL /* Bus clock frequency in clock configuration 0 */
 #define CPU_FLEXBUS_CLK_HZ_CONFIG_0     0UL /* Flexbus clock frequency in clock configuration 0 */
 #define CPU_FLASH_CLK_HZ_CONFIG_0       20480000UL /* FLASH clock frequency in clock configuration 0 */
