@@ -1,5 +1,11 @@
-FLASH/
-.settings/
-Documentation/
+/FLASH
+/.settings
+/Documentation
+/.vscode
+/.idea
 
+
+*.g_c
+*.g_x
 **.xml
+.cwGeneratedFileSetLog
